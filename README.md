@@ -1,1 +1,1 @@
-Code for the USACO Human Tutoring Gadget.
+## Code for the USACO Human Tutoring Gadget.
