@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 import json
 import time
-import pyperclip
+# import pyperclip
 
 def generate_response(history, api_key, model='gpt-3.5'):
     openai.api_key = api_key
@@ -49,17 +49,17 @@ def main():
         # Question solving prompt:
         description = usaco_data[selected_option]['description']
         problem_link = usaco_data[selected_option]['problem_link']
-        text_input = st.text_area("Problem Statement:", value=description)
         problem_link_statement = f"To submit, utilize the problem link below. Make sure to create an account or you won't be able to submit! \n {problem_link}."
         base_prompt = "Please reply with a Python 3 solution to the below problem. Make sure to wrap your code in '```python' and '```' Markdown delimiters, and include exactly one block of code with the entire solution. Feel free to either return just the one code block with your solution or the one code block with explanatory text before and/or after -- however, you will only be evaluated on the correctness of your code.\n\n[BEGIN PROBLEM]\n{}\n[END PROBLEM]\n\n"
-        initial_prompt = base_prompt.format(text_input)
-        if st.button("Copy prompt to Clipboard"):
-            if text_input:
-                # Copy the text to the clipboard
-                pyperclip.copy(initial_prompt)
-                st.success("Text copied to clipboard!")
-            else:
-                st.warning("No text to copy.")
+        initial_prompt = base_prompt.format(description)
+        text_input = st.text_area("Problem Prompt:", value=initial_prompt)
+        # if st.button("Copy prompt to Clipboard"):
+        #     if text_input:
+        #         # Copy the text to the clipboard
+        #         pyperclip.copy(initial_prompt)
+        #         st.success("Text copied to clipboard!")
+        #     else:
+        #         st.warning("No text to copy.")
         st.write(problem_link_statement)
 
     uploaded_file = st.file_uploader("Upload Conversation", type=["json"])
