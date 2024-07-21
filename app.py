@@ -13,16 +13,13 @@ def generate_response(history, api_key, model='gpt-3.5'):
     return response['choices'][0]['message']['content']
 
 def main():
-    st.title("USACO Human Tutoring Gadget")
+    st.title("USACO Human Tutoring")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
     with st.sidebar:
         # Define the options for the multiple choice
-        if st.button("Reset Conversation"):
-            st.session_state.messages = []
-        
         options = ['gpt-3.5-turbo', 'gpt-4o', 'gpt-4-1106-preview', 'gpt-4-turbo', 'choose your own']
         selected_option = st.radio('Select a Model', options, options.index('gpt-4o'))
         if selected_option == 'choose your own':
@@ -44,7 +41,7 @@ def main():
         questions = list(usaco_data.keys())
         search_term = st.text_input("Silly search bar:")
         filtered_questions = [question for question in questions if search_term.lower() in question.lower()]
-        selected_option = st.selectbox("Select a USACO question, or paste your own: ", filtered_questions, key="unique_key")
+        selected_option = st.selectbox("Select a USACO question: ", filtered_questions, key="unique_key")
 
         # Question solving prompt:
         description = usaco_data[selected_option]['description']
@@ -61,6 +58,29 @@ def main():
         #     else:
         #         st.warning("No text to copy.")
         st.write(problem_link_statement)
+    
+    if st.button("Reset Conversation"):
+        st.session_state.messages = []
+    # trajectories = []
+    # for filename in os.listdir('trajectories'):
+    #     # Join the directory path with the filename to get the full path
+    #     full_path = os.path.join('trajectories', filename)
+        
+    #     # Check if it is a file
+    #     if os.path.isfile(full_path):
+    #         trajectories.append(filename)
+    
+    # selected_trajectory = st.selectbox("Select an existing trajectory: ", trajectories)
+    query_params = st.experimental_get_query_params()
+    if 'trajectory' in query_params and query_params['trajectory']:
+        trajectory = query_params['trajectory'][0]
+        try:
+            file = open('trajectories/'+trajectory+'.json')
+            json_data = json.load(file)
+            st.session_state.messages = json_data
+
+        except json.JSONDecodeError:
+            st.error("Invalid JSON file. Please select a valid JSON file.")  
 
     uploaded_file = st.file_uploader("Upload Conversation", type=["json"])
     if uploaded_file:
@@ -82,8 +102,10 @@ def main():
             on_click=None,
             file_name=filename,
         )
-    st.subheader("Instructions:")
-    st.write("To begin, first input an OpenAI API key on the left hand side. Then, select a problem from the search bar, and copy + paste the prompt to the model. Alternatively, you may upload an existing JSON conversation. To evaluate generated code, paste generated code into a python file, and upload said file to the website provided below the problem statement on the left hand bar. Be aware you must create an account first! Happy tutoring :)")
+    
+    if not 'trajectory' in query_params:
+        st.subheader("Instructions:")
+        st.write("To begin, first input an OpenAI API key on the left hand side. Then, select a problem from the search bar, and copy + paste the prompt to the model. Alternatively, you may upload an existing JSON conversation, or select one of the preset. To evaluate generated code, paste generated code into a python file, and upload said file to the website provided below the problem statement on the left hand bar. Be aware you must create an account first! Happy tutoring :)")
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
